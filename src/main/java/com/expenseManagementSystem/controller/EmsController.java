@@ -15,7 +15,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/webapi")
-@CrossOrigin(origins="http://localhost:4200")
+@CrossOrigin(origins="http://54.214.113.249/")
 public class EmsController {
 
     @Autowired
