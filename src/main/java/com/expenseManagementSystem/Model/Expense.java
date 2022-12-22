@@ -18,13 +18,4 @@ public class Expense {
 
     public int amount;
 
-    @ManyToOne(cascade = {CascadeType.ALL})
-    @NotFound(action = NotFoundAction.IGNORE)
-    public User user;
-
-
-
-
-
-
 }

@@ -2,12 +2,12 @@ package com.expenseManagementSystem.Model;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 import org.springframework.stereotype.Component;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Component
@@ -15,11 +15,16 @@ import javax.persistence.Id;
 @AllArgsConstructor
 public class User {
 
-    @Id
+
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public int userId;
 
-    public String userName;
 
-    public String designation;
+    @Id
+    public String emailId;
+
+    @OneToMany(cascade = {CascadeType.ALL})
+    @NotFound(action = NotFoundAction.IGNORE)
+    public List<Expense> expense;
+
 }

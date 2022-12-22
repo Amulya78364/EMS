@@ -2,9 +2,12 @@ package com.expenseManagementSystem.controller;
 
 import com.expenseManagementSystem.Model.Expense;
 import com.expenseManagementSystem.Model.User;
+import com.expenseManagementSystem.dto.ExpenseDTO;
+import com.expenseManagementSystem.dto.UserDTO;
 import com.expenseManagementSystem.repository.ExpenseRepository;
 import com.expenseManagementSystem.repository.UserRepository;
 import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.util.JSONUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,9 +27,7 @@ public class EmsController {
     @Autowired
     UserRepository userRepo;
 
-    static String uname="";
-
-    String uname1="";
+    static String uname1;
 
 
     @GetMapping("/ems")
@@ -35,55 +36,84 @@ public class EmsController {
     }
 
     @PostMapping("ems/postExpenses")
-    public Expense postExpenses(@RequestBody Expense exp){
+    public ExpenseDTO postExpenses(@RequestBody Expense exp,Principal principal){
+        ExpenseDTO expenseDTO = new ExpenseDTO();
+        String uname = principal.getName();
         User user1=new User();
         List<User> data = userRepo.findAll();
         for(User u:data){
-            String name=u.userName;
+            String name=u.emailId;
             if(name.equals(uname)){
                 user1 = u;
             }
-            exp.user=user1;
         }
-        return expenseRepo.save(exp);
+        user1.expense.add(exp);
+        expenseRepo.save(exp);
+        expenseDTO.setExpenseType(exp.expenseType);
+        expenseDTO.setAmount(exp.amount);
+
+        return expenseDTO;
 //       return exp;
     }
 
-    @PostMapping("/ems/postUsername")
-    public String postUserName(@RequestBody User username) throws ParseException {
-//        JSONUtils.parseJSON(uname1);
-        uname1=""+username.userName;
-        return uname1;
+    @PostMapping("ems/postAdminExpenses")
+    public void postAdminExpenses(@RequestBody Expense expense){
+        User user=userRepo.findByEmailId(uname1);
+        Expense exp = new Expense();
+        exp.expenseType=expense.expenseType;
+        exp.amount=expense.amount;
+        user.expense.add(exp);
+        expenseRepo.save(exp);
     }
 
-    @PostMapping("/ems/postUser")
-    public User postUser(@RequestBody User user){
-        uname=user.userName;
-//         return "User Details are Submitted";
-        User u = userRepo.save(user);
-        return u;
+    @GetMapping("/ems/getUserName")
+    public List<String> getUserName(Principal principal){
+        String uname = principal.getName();
+        List<User> user = userRepo.findAll();
+        List<String> listnames= new ArrayList<>();
+        if(uname.equals("amulya.nathala.736@my.csun.edu") || uname.equals("felix@gmail.com")){
+            for(User u:user) {
+                listnames.add(u.emailId);
+            }
+        }
+        return listnames;
+    }
+
+
+    @GetMapping("/ems/postUser")
+    public UserDTO postUser(Principal principal){
+        String name = principal.getName();
+        User u = new User();
+        u.emailId=name;
+//        List<User> user = new ArrayList<>();
+//        for(User user1:user){
+//            if(!(user1.equals(name))){
+                 userRepo.save(u);
+//        }
+//        else
+//            continue;
+//    }
+        UserDTO userDTO=new UserDTO();
+        userDTO.setEmailId(u.emailId);
+        return userDTO;
+    }
+
+    @PostMapping("/ems/postUsername")
+    public String postUserName(@RequestBody User userName) throws ParseException {
+        uname1=""+userName.emailId;
+        return uname1;
     }
 
 
     @GetMapping("/ems/getExpenses")
-    public List<Expense> getExpenses(){
-        List<Expense> result=new ArrayList<>();
-        List<User> data = userRepo.findAll();
-        int id=0;
-        for(User u:data) {
-            String name = u.userName;
-            if (name.equals(uname)) {
-                id = u.userId;
-                break;
-            }
-        }
-        List<Expense> exp = expenseRepo.findAll();
-        for(Expense e:exp){
-            if(e.user.userId==id){
-                result.add(e);
-            }
-        }
-        return result;
+    public List<Expense> getExpenses(Principal principal){
+        String uname = principal.getName();
+        User data = userRepo.findByEmailId(uname);
+        List<Expense> exp = new ArrayList<>();
+        for(Expense e :data.expense) {
+            exp.add(e);
+           }
+        return exp;
     }
 
     @GetMapping("expensedetails/{id}")
@@ -93,10 +123,12 @@ public class EmsController {
     }
 
     @GetMapping("/ems/getAllExpenses")
-    public List<Expense> getAllExpenses(){
-        List<Expense> list = new ArrayList<>();
-        if(uname.equals("admin"))
-            return expenseRepo.findAll();
+    public List<User> getAllExpenses(Principal principal){
+        String uname= principal.getName();
+        List<User> list = new ArrayList<>();
+        if(uname.equals("amulya.nathala.736@my.csun.edu") || uname.equals("felix@gmail.com")) {
+            return userRepo.findAll();
+        }
         return list;
     }
 }
