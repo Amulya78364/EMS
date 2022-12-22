@@ -51,7 +51,7 @@ public class Configuration extends WebSecurityConfigurerAdapter {
 
 
         //allowedOrigins.add("*");
-        allowedOrigins.add("http://54.214.113.249");
+        allowedOrigins.add("http://34.212.231.73");
         config.setAllowedOrigins(allowedOrigins);
         allowedMethods.add("*");
         allowedHeaders.add("*");
